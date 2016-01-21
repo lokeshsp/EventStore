@@ -12,16 +12,16 @@ using EventStore.Projections.Core.Messages;
 
 namespace EventStore.Projections.Core.Services.Processing
 {
-    public class EventReaderCoreService : 
-        IHandle<ReaderCoreServiceMessage.StartReader>, 
-        IHandle<ReaderCoreServiceMessage.StopReader>, 
-        IHandle<ReaderSubscriptionManagement.Subscribe>, 
-        IHandle<ReaderSubscriptionManagement.Unsubscribe>, 
-        IHandle<ReaderSubscriptionManagement.Pause>, 
+    public class EventReaderCoreService :
+        IHandle<ReaderCoreServiceMessage.StartReader>,
+        IHandle<ReaderCoreServiceMessage.StopReader>,
+        IHandle<ReaderSubscriptionManagement.Subscribe>,
+        IHandle<ReaderSubscriptionManagement.Unsubscribe>,
+        IHandle<ReaderSubscriptionManagement.Pause>,
         IHandle<ReaderSubscriptionManagement.Resume>,
         IHandle<ReaderSubscriptionManagement.SpoolStreamReadingCore>,
         IHandle<ReaderSubscriptionManagement.CompleteSpooledStreamReading>,
-        IHandle<ReaderSubscriptionMessage.CommittedEventDistributed>, 
+        IHandle<ReaderSubscriptionMessage.CommittedEventDistributed>,
         IHandle<ReaderSubscriptionMessage.EventReaderIdle>,
         IHandle<ReaderSubscriptionMessage.EventReaderStarting>,
         IHandle<ReaderSubscriptionMessage.EventReaderNotAuthorized>,
@@ -129,7 +129,10 @@ namespace EventStore.Projections.Core.Services.Processing
         {
             if (!_pausedSubscriptions.Contains(message.SubscriptionId))
                 Handle(new ReaderSubscriptionManagement.Pause(message.SubscriptionId));
-            var eventReaderId = _subscriptionEventReaders[message.SubscriptionId];
+
+            Guid eventReaderId = Guid.Empty;
+            _subscriptionEventReaders.TryGetValue(message.SubscriptionId, out eventReaderId);
+            
             if (eventReaderId != Guid.Empty)
             {
                 //TODO: test it
@@ -320,7 +323,7 @@ namespace EventStore.Projections.Core.Services.Processing
 //                    "The '{0}' is subscribing to the heading distribution point with TF-EOF marker event at '{1}'",
 //                    projectionId, message.SafeTransactionFileReaderJoinPosition);
 //            }
-                
+
             Guid eventReaderId = message.CorrelationId;
             _eventReaders[eventReaderId].Dispose();
             _eventReaders.Remove(eventReaderId);
