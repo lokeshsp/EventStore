@@ -58,9 +58,10 @@ namespace EventStore.Projections.Core.Services.Management
                     if (completed.Result != OperationResult.Success)
                     {
                         var message = string.Format(
-                            "Cannot write commands to the stream {0}. status: {1}",
+                            "Cannot write commands to the stream {0}. status: {1}\n{2}",
                             ProjectionNamesBuilder._projectionsMasterStream,
-                            completed.Result);
+                            completed.Result,
+                            Newtonsoft.Json.JsonConvert.SerializeObject(events));
                         _logger.Fatal(message);
                         throw new Exception(message);
                     }
